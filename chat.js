@@ -10,14 +10,19 @@ const configuration = new Configuration({
   apiKey: 'sk-666666666666666666666666666666666666666666666667'
 })
 const openai = new OpenAIApi(configuration)
-
+var conversationLog = [{ role: 'system', content: '你是ChatGPT，OpenAI训练的大型语言模型。尽可能简短的回答问题。' }];
 
 
 export async function getOpenAiReply(data, domainFrom) {
   let prompt = data.msg
-  console.log('/ prompt', prompt)
+  // console.log('/ prompt', prompt)
 
-  let conversationLog = [{ role: 'system', content: '你是ChatGPT，OpenAI训练的大型语言模型。尽可能简短的回答问题。' }];
+  if (conversationLog.length > 20)
+  {
+	// 删除一个回合的对话
+	conversationLog.pop();
+	conversationLog.pop();
+  }
   conversationLog.push({
 	role: 'user',
 	content: prompt,
@@ -33,7 +38,12 @@ export async function getOpenAiReply(data, domainFrom) {
   });
 
   const reply = response.data.choices[0].message.content;
-  console.log('/ reply', reply)
+  // gpt的回答也存起来，才能有上下文
+  conversationLog.push({
+	role: 'assistant',
+	content: reply,
+  });
+  // console.log('/ reply', reply)
   // return reply
   let json = {
 	msg: `@${data.name} ${reply}`,
