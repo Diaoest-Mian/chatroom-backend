@@ -1,12 +1,57 @@
-const fs = require('fs');
-const https = require('https');
-const WebSocket = require('ws');
-const psl = require('psl');
-const axios = require('axios');
-const schedule = require('node-schedule');
+import { Configuration, OpenAIApi } from 'openai'
+import fs from 'fs'
+import https from 'https'
+import WebSocket from 'ws'
+import psl from 'psl'
+import axios from 'axios'
+import schedule from 'node-schedule'
+
+const configuration = new Configuration({
+  apiKey: 'sk-666666666666666666666666666666666666666666666667'
+})
+const openai = new OpenAIApi(configuration)
+
+
+
+export async function getOpenAiReply(data, domainFrom) {
+  let prompt = data.msg
+  console.log('/ prompt', prompt)
+
+  let conversationLog = [{ role: 'system', content: '你是ChatGPT，OpenAI训练的大型语言模型。尽可能简短的回答问题。' }];
+  conversationLog.push({
+	role: 'user',
+	content: prompt,
+  });
+
+  const response = await openai.createChatCompletion({
+	model: 'gpt-3.5-turbo',
+	messages: conversationLog,
+	// max_tokens: 256, // limit token usage
+  })
+  .catch((error) => {
+	console.log(`OPENAI ERR: ${error}`);
+  });
+
+  const reply = response.data.choices[0].message.content;
+  console.log('/ reply', reply)
+  // return reply
+  let json = {
+	msg: `@${data.name} ${reply}`,
+	time: Date.now(),
+	id: 37293031037,
+	name: 'GPT',
+	robot: true
+  }
+  setTimeout(()=>{
+	broadcastMessage(json, domainFrom);
+	logMessageHistory(json, domainFrom);
+  }, 500);
+}
+
+
 const tuling123ApiUrl = 'http://openapi.tuling123.com/openapi/api/v2';
-const tuling123ApiKeyArr = [ //无所谓了，laji图灵API，限制请求次数，估计已经无了
-	'5da047a95db8450ea6e710dd065d4be4' //你自己的图灵123ApiKey, 不要用我的^_^
+const tuling123ApiKeyArr = [
+	'5da047a95db8450ea6e777dd065d4be4' //你自己的图灵123ApiKey, 不要用我的^_^
 	]
 const tuling123ApiKey = ()=>{
 	const len = tuling123ApiKeyArr.length;
@@ -19,7 +64,7 @@ schedule.scheduleJob('59 59 23 * * 0', function(){
 });
 
 const server = new https.createServer({
-	// 这里的域名是用于WSS通信的域名
+	// 这里的域名是你用于WSS通信的域名
 	cert: fs.readFileSync('/etc/nginx/conf/ssl/ws.tianba.tk.cer'), //你自己域名的SSL证书 ^_^
 	key: fs.readFileSync('/etc/nginx/conf/ssl/ws.tianba.tk.key') //你自己域名的SSL私钥 ^_^
 });
@@ -146,6 +191,7 @@ function broadcastMemberList(domainFrom=undefined){
 			id: c.id,
 			name: c.name
 		}));
+		output.unshift({id: 37293031037, name:'GPT'});
 		output.unshift({id: 12523461428, name:'小尬'});
 		return output;
 	}
@@ -224,6 +270,10 @@ function broadcastMessage(data, domainFrom){
 	if(data.msg.includes('@小尬') && !data.robot){
 		robotEcho(data, domainFrom);
 	}
+	if(data.msg.includes('@GPT') && !data.robot)
+	{
+		getOpenAiReply(data, domainFrom);
+	}
 	if(members.length>1 && !data.robot){
 		pushDomain(domainFrom);
 	}
@@ -256,7 +306,7 @@ function robotEcho(data, domainFrom){
 		};
 		let res = await axios.post(tuling123ApiUrl, req);
 		res = res.data;
-		if(!res || !res.intent || res.intent.code != 0 || res.results.length===0) { // 改了intent的code
+		if(!res || !res.intent || res.intent.code != 0 || res.results.length===0) {
 			res.apiKey = req.userInfo.apiKey;
 			console.log(JSON.stringify(res, null, 2));
 			return;
@@ -363,9 +413,9 @@ function genRandomName(){
 	const len1 = name1Arr.length;
 	// const len2 = name2Arr.length;
 	const len3 = name3Arr.length;
-	name1 = name1Arr[~~(Math.random()*len1)];
+	var name1 = name1Arr[~~(Math.random()*len1)];
 	// name2 = name2Arr[~~(Math.random()*len2)];
-	name3 = name3Arr[~~(Math.random()*len3)];
+	var name3 = name3Arr[~~(Math.random()*len3)];
 	// return name1+name2+name3;
 	return name1+name3;
 }
