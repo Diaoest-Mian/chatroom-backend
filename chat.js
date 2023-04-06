@@ -400,7 +400,7 @@ function updateUserInfo(data){
 function loadMessageHistory(domain){
 	let len = messageHistory.length;
 	let arr = [];
-	for(let i=0; i<len && arr.length<10; i++){
+	for(let i=0; i<len && arr.length<20; i++){
 		let item = messageHistory[i];
 		if(!item) break;
 		if(item.domainFrom===domain){
