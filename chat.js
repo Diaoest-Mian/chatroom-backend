@@ -28,6 +28,8 @@ export async function getOpenAiReply(data, domainFrom) {
 	content: prompt,
   });
 
+  var reply = "";
+  var is_fine = true;
   const response = await openai.createChatCompletion({
 	model: 'gpt-3.5-turbo',
 	messages: conversationLog,
@@ -35,14 +37,20 @@ export async function getOpenAiReply(data, domainFrom) {
   })
   .catch((error) => {
 	console.log(`OPENAI ERR: ${error}`);
+	reply = error;
+	is_fine = false;
   });
 
-  const reply = response.data.choices[0].message.content;
-  // gpt的回答也存起来，才能有上下文
-  conversationLog.push({
-	role: 'assistant',
-	content: reply,
-  });
+  if(is_fine)
+  {
+	reply = response.data.choices[0].message.content;
+  	// gpt的回答也存起来，才能有上下文
+  	conversationLog.push({
+		role: 'assistant',
+		content: reply,
+  	});
+  }
+  
   // console.log('/ reply', reply)
   // return reply
   let json = {
