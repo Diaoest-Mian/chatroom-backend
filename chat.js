@@ -7,14 +7,14 @@ import axios from 'axios'
 import schedule from 'node-schedule'
 
 const configuration = new Configuration({
-  apiKey: 'sk-666666666666666666666666666666666666666666666667'
+  apiKey: 'sk-666666666666666666666666666666666666666666666667', // 看清楚了， 这个Key的K，是大写
 })
 const openai = new OpenAIApi(configuration)
 var conversationLog = [{ role: 'system', content: '你是ChatGPT，OpenAI训练的大型语言模型。尽可能简短的回答问题。' }];
 
 
 export async function getOpenAiReply(data, domainFrom) {
-  let prompt = data.msg
+  let prompt = data.msg.replace(/@GPT/g, '').trim();
   // console.log('/ prompt', prompt)
 
   if (conversationLog.length > 20)
@@ -44,6 +44,7 @@ export async function getOpenAiReply(data, domainFrom) {
   if(is_fine)
   {
 	reply = response.data.choices[0].message.content;
+	// cosole.log(response)
   	// gpt的回答也存起来，才能有上下文
   	conversationLog.push({
 		role: 'assistant',
