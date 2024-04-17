@@ -11,6 +11,7 @@ An anonymous chatroom backend mainly based on node.js and websocket
 ~/.acme.sh/acme.sh --installcert -d ws.tianba.tk --ca-file /etc/nginx/conf/ssl/ca.cer --cert-file /etc/nginx/conf/ssl/ws.tianba.tk.cer --key-file /etc/nginx/conf/ssl/ws.tianba.tk.key --fullchain-file /etc/nginx/conf/ssl/fullchain.cer
 ```
 PS: 如果网站的SSL/TLS 加密为完全或严格，自签证书无法使用，可以使用`cloudflared tunnel`, 参考[cloudflare tunnel is possible for websockets](https://www.reddit.com/r/CloudFlare/comments/1btxfnr/cloudflare_tunnel_is_it_possible_for_websockets/)
+
 4. 执行`node chat.js`开始监听
 
 # 致谢
