@@ -1,6 +1,7 @@
 import { Configuration, OpenAIApi } from 'openai'
 import fs from 'fs'
 import https from 'https'
+import http from 'http' // 这两个都是创建服务器用的
 import WebSocket from 'ws'
 import psl from 'psl'
 import axios from 'axios'
@@ -82,7 +83,8 @@ schedule.scheduleJob('59 59 23 * * 0', function(){
 	clearDomainBillboard();
 });
 
-const server = new https.createServer({
+// const server = new https.createServer({
+const server = new http.createServer({  // 改成http是配合走cloudflared tunnel
 	// 这里的域名是你用于WSS通信的域名
 	cert: fs.readFileSync('/etc/nginx/conf/ssl/ws.tianba.tk.cer'), //你自己域名的SSL证书 ^_^
 	key: fs.readFileSync('/etc/nginx/conf/ssl/ws.tianba.tk.key') //你自己域名的SSL私钥 ^_^
